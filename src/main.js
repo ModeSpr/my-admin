@@ -1,23 +1,18 @@
 import Vue from "vue";
-import App from "./App";
-import store from "./store";
+import App from "./App.vue";
+import "./registerServiceWorker";
 import router from "./router";
-import "./plugins";
-/**
- * @copyright chuzhixin 1204505056@qq.com
- * @description 生产环境默认都使用mock，如果正式用于生产环境时，记得去掉
- */
+import store from "./store";
+// ant-design-vue
+// import 'ant-design-vue/dist/antd.css';
+import { DatePicker } from 'ant-design-vue';
+Vue.use(DatePicker)
 
-if (process.env.NODE_ENV === "production") {
-  const { mockXHR } = require("@/config/static");
-  mockXHR();
-}
 
 Vue.config.productionTip = false;
 
 new Vue({
-  el: "#vue-admin-beautiful",
   router,
   store,
-  render: (h) => h(App),
-});
+  render: h => h(App)
+}).$mount("#app");

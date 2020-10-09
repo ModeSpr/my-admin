@@ -1,13 +1,24 @@
+# v-admin
 
-<h1> my-admin </h1>
-
-## 安装
-
-```bash
-# 安装依赖
-npm i 
-# 或
-yarn
-# 本地开发 启动项目
-npm run serve
+## Project setup
 ```
+yarn install
+```
+
+### Compiles and hot-reloads for development
+```
+yarn serve
+```
+
+### Compiles and minifies for production
+```
+yarn build
+```
+
+### Lints and fixes files
+```
+yarn lint
+```
+
+### Customize configuration
+See [Configuration Reference](https://cli.vuejs.org/config/).

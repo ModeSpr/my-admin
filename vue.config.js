@@ -1,4 +1,17 @@
+const isProduction = process.env.NODE_ENV === 'production'
+const CompressionWebpackPlugin = require("compression-webpack-plugin")
+// const UglifyJsPlugin = require("uglifyjs-webpack-plugin")
+// const cdn = {
+//   js: {
+//     Vue: ['https://cdn.bootcss.com/vue/2.6.10/vue.min.js', '/static/vue.min.js'],
+//     VueRouter: ['https://cdn.bootcss.com/vue-router/3.0.4/vue-router.min.js', '/static/vue-router.min.js'],
+//     axios: ['https://cdn.bootcss.com/axios/0.18.0/axios.min.js', '/static/axios.min.js']
+//   }
+// }
 const path = require("path");
+const resolve = (dir) => {
+  return path.join(__dirname, dir);
+};
 const {
   publicPath,
   assetsDir,
@@ -12,31 +25,6 @@ const {
   build7z,
   donation,
 } = require("./src/config/settings");
-const {
-  webpackBarName,
-  webpackBanner,
-  donationConsole,
-} = require("zx-layouts");
-
-if (donation) donationConsole();
-const { version, author } = require("./package.json");
-const Webpack = require("webpack");
-const WebpackBar = require("webpackbar");
-const FileManagerPlugin = require("filemanager-webpack-plugin");
-const dayjs = require("dayjs");
-const date = dayjs().format("YYYY_M_D");
-const time = dayjs().format("YYYY-M-D HH:mm:ss");
-const CompressionWebpackPlugin = require("compression-webpack-plugin");
-const productionGzipExtensions = ["html", "js", "css", "svg"];
-process.env.VUE_APP_TITLE = title || "vue-admin-beautiful";
-process.env.VUE_APP_AUTHOR = author || "chuzhixin 1204505056@qq.com";
-process.env.VUE_APP_UPDATE_TIME = time;
-process.env.VUE_APP_VERSION = version;
-
-const resolve = (dir) => {
-  return path.join(__dirname, dir);
-};
-
 const mockServer = () => {
   if (process.env.NODE_ENV === "development") {
     return require("./mock/mockServer.js");
@@ -46,11 +34,8 @@ const mockServer = () => {
 };
 
 module.exports = {
-  publicPath,
-  assetsDir,
-  outputDir,
-  lintOnSave,
-  transpileDependencies,
+  lintOnSave: false, // 关闭eslint
+  productionSourceMap: false,
   devServer: {
     hot: true,
     port: devPort,
@@ -61,136 +46,15 @@ module.exports = {
       errors: true,
     },
     after: mockServer(),
+    // proxy: {         // 开发环境代理
+    //   '/merchant': {
+    //     target: 'https://zcg.dev.poopg.com',
+    //     // ws: true, //  websockets
+    //     // secure: false,  // https
+    //     changeOrigin: true
+    //   }
+    // }
   },
-  configureWebpack() {
-    return {
-      resolve: {
-        alias: {
-          "@": resolve("src"),
-        },
-      },
-      plugins: [
-        new Webpack.ProvidePlugin(providePlugin),
-        new WebpackBar({
-          name: webpackBarName,
-        }),
-      ],
-    };
-  },
-  chainWebpack(config) {
-    /* config.plugins.delete("preload");
-    config.plugins.delete("prefetch"); */
-    config.module
-      .rule("svg")
-      .exclude.add(resolve("src/remixIcon"))
-      .add(resolve("src/colorfulIcon"))
-      .end();
-
-    config.module
-      .rule("remixIcon")
-      .test(/\.svg$/)
-      .include.add(resolve("src/remixIcon"))
-      .end()
-      .use("svg-sprite-loader")
-      .loader("svg-sprite-loader")
-      .options({ symbolId: "remix-icon-[name]" })
-      .end();
-
-    config.module
-      .rule("colorfulIcon")
-      .test(/\.svg$/)
-      .include.add(resolve("src/colorfulIcon"))
-      .end()
-      .use("svg-sprite-loader")
-      .loader("svg-sprite-loader")
-      .options({ symbolId: "colorful-icon-[name]" })
-      .end();
-
-    config.when(process.env.NODE_ENV === "development", (config) => {
-      config.devtool("source-map");
-    });
-    config.when(process.env.NODE_ENV !== "development", (config) => {
-      config.performance.set("hints", false);
-      config.devtool("none");
-      config.optimization.splitChunks({
-        chunks: "all",
-        cacheGroups: {
-          libs: {
-            name: "chunk-libs",
-            test: /[\\/]node_modules[\\/]/,
-            priority: 10,
-            chunks: "initial",
-          },
-          elementUI: {
-            name: "chunk-elementUI",
-            priority: 20,
-            test: /[\\/]node_modules[\\/]_?element-ui(.*)/,
-          },
-          fortawesome: {
-            name: "chunk-fortawesome",
-            priority: 20,
-            test: /[\\/]node_modules[\\/]_?@fortawesome(.*)/,
-          },
-          commons: {
-            name: "chunk-commons",
-            test: resolve("src/components"),
-            minChunks: 3,
-            priority: 5,
-            reuseExistingChunk: true,
-          },
-        },
-      });
-      config
-        .plugin("banner")
-        .use(Webpack.BannerPlugin, [`${webpackBanner}${time}`])
-        .end();
-      config
-        .plugin("compression")
-        .use(CompressionWebpackPlugin, [
-          {
-            filename: "[path].gz[query]",
-            algorithm: "gzip",
-            test: new RegExp(
-              "\\.(" + productionGzipExtensions.join("|") + ")$"
-            ),
-            threshold: 8192,
-            minRatio: 0.8,
-          },
-        ])
-        .end();
-      config.module
-        .rule("images")
-        .use("image-webpack-loader")
-        .loader("image-webpack-loader")
-        .options({
-          bypassOnDebug: true,
-        })
-        .end();
-    });
-
-    if (build7z) {
-      config.when(process.env.NODE_ENV === "production", (config) => {
-        config
-          .plugin("fileManager")
-          .use(FileManagerPlugin, [
-            {
-              onEnd: {
-                delete: [`./${outputDir}/video`, `./${outputDir}/data`],
-                archive: [
-                  {
-                    source: `./${outputDir}`,
-                    destination: `./${outputDir}/${abbreviation}_${outputDir}_${date}.7z`,
-                  },
-                ],
-              },
-            },
-          ])
-          .end();
-      });
-    }
-  },
-  runtimeCompiler: true,
-  productionSourceMap: false,
   css: {
     requireModuleExtension: true,
     sourceMap: true,
@@ -200,17 +64,117 @@ module.exports = {
         //prependData: '@import "~@/styles/variables.scss";',
 
         /*sass-loader 9.0写法，感谢github用户 shaonialife*/
-        additionalData(content, loaderContext) {
-          const { resourcePath, rootContext } = loaderContext;
-          const relativePath = path.relative(rootContext, resourcePath);
-          if (
-            relativePath.replace(/\\/g, "/") !== "src/styles/variables.scss"
-          ) {
-            return '@import "~@/styles/variables.scss";' + content;
-          }
-          return content;
-        },
+        // additionalData(content, loaderContext) {
+        //   const { resourcePath, rootContext } = loaderContext;
+        //   const relativePath = path.relative(rootContext, resourcePath);
+        //   if (
+        //     relativePath.replace(/\\/g, "/") !== "src/styles/variables.scss"
+        //   ) {
+        //     return '@import "~@/styles/variables.scss";' + content;
+        //   }
+        //   return content;
+        // },
       },
     },
   },
-};
+  chainWebpack: config => {
+    config.when(process.env.NODE_ENV === "development", (config) => {
+      config.devtool("source-map");
+    });
+    // 配置别名
+    config.resolve.alias
+      .set("@", resolve("src"))
+      .set("assets", resolve("src/assets"))
+      .set("components", resolve("src/components"))
+      .set("public", resolve("public"));
+
+    // 移除 prefetch 插件
+    // config.plugins.delete('prefetch')
+
+    // 分析打包文件 npm run build --report
+    if (process.env.npm_config_report) {
+      config
+        .plugin('webpack-bundle-analyzer')
+        .use(require('webpack-bundle-analyzer').BundleAnalyzerPlugin)
+        .end()
+      config.plugins.delete('prefetch')
+    }
+    
+    config.when(process.env.NODE_ENV === "production", (config) => { })
+    if (isProduction) {
+      // cdn 注入
+      // config.plugin('html')
+      //   .tap(args => {
+      //     args[0].cdn = cdn;
+      //     return args;
+      //   })
+    }
+  },
+  configureWebpack: config => {
+    if (isProduction) {
+      // 生成环境取消打包的依赖，改为cdn
+      // config.externals = {
+      //   'vue': "Vue",
+      //   "vue-router": "VueRouter",
+      //   "element-ui": "ELEMENT",
+      //   'axios': "axios"
+      // }
+      // gzip 压缩
+      config.plugins.push(new CompressionWebpackPlugin({
+        algorithm: 'gzip',
+        test: /\.js$|\.html$|.\css/,    // 匹配文件名
+        threshold: 10240,               // 对超过10k的数据压缩
+        minRatio: 0.8,
+        deleteOriginalAssets: false     // 不删除源文件
+      }))
+      // 去除console
+      // config.plugins.push(
+      //   new UglifyJsPlugin({
+      //     uglifyOptions: {
+      //       compress: {
+      //         // warnings: false,
+      //         drop_debugger: true,
+      //         drop_console: true,
+      //       },
+      //     },
+      //     sourceMap: false,
+      //     parallel: true,
+      //   })
+      // )
+    }
+    // 公共代码抽离
+    config.optimization = {
+      splitChunks: {
+        cacheGroups: {
+          vendor: {
+            chunks: 'all',
+            test: /node_modules/,
+            name: 'vendor',
+            minChunks: 1,
+            maxInitialRequests: 5,
+            minSize: 0,
+            priority: 100
+          },
+          common: {
+            chunks: 'all',
+            test: /[\\/]src[\\/]js[\\/]/,
+            name: 'common',
+            minChunks: 2,
+            maxInitialRequests: 5,
+            minSize: 0,
+            priority: 60
+          },
+          styles: {
+            name: 'styles',
+            test: /\.(sa|sc|c)ss$/,
+            chunks: 'all',
+            enforce: true
+          },
+          runtimeChunk: {
+            name: 'manifest'
+          }
+        }
+      }
+    }
+  }
+}
