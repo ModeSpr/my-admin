@@ -86,7 +86,8 @@ module.exports = {
       .set("@", resolve("src"))
       .set("assets", resolve("src/assets"))
       .set("components", resolve("src/components"))
-      .set("public", resolve("public"));
+      .set("public", resolve("public"))
+      .set("views", resolve("./src/views"));
 
     // 移除 prefetch 插件
     // config.plugins.delete('prefetch')

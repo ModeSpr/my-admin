@@ -5,8 +5,14 @@ import router from "./router";
 import store from "./store";
 // ant-design-vue
 // import 'ant-design-vue/dist/antd.css';
-import { DatePicker } from 'ant-design-vue';
+
+import '@/styles/variables.scss';
+// import 'ant-design-vue/dist/antd.css';
+import { DatePicker, Layout, Menu, Sider, Icon } from 'ant-design-vue';
 Vue.use(DatePicker)
+Vue.use(Layout)
+Vue.use(Menu)
+Vue.use(Icon)
 
 
 Vue.config.productionTip = false;
