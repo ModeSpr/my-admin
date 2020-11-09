@@ -9,19 +9,49 @@ const constantRoutes = [
   {
     path: '/',
     component: Layout,
-    redirect: 'index',
+    redirect: '/dashboard',
     children: [
       {
-        path: 'index',
-        name: 'Index',
-        component: () => import('@/views/Home'),
-        meta: {
-          title: '首页',
-          icon: 'home',
-          affix: true,
-        },
+        path: '/dashboard',
+        name: 'dashboard',
+        component: () => import('@/views/dashboard'),
+        meta: { title: 'Dashboard', icon: 'dashboard', permissions: ['admin'] }
       },
     ],
+  },
+  {
+    path: '/home',
+    component: Layout,
+    redirect: '/home',
+    meta: { title: '首页', icon: 'home' },
+    children: [
+      {
+        path: '/index',
+        name: 'list',
+        component: () => import('@/views/index'),
+        meta: { title: '列表', icon: 'unordered-list' }
+      },
+      {
+        path: '/product',
+        name: 'product',
+        component: () => import('@/views/product'),
+        meta: { title: '产品', icon: 'project' }
+      },
+    ],
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: () => import('@/views/login/login'),
+    meta: { title: '登录' },
+    hidden: true
+  },
+  {
+    path: '/404',
+    name: '404',
+    component: () => import('@/views/default/404'),
+    meta: { title: 'NotFound' },
+    hidden: true
   },
   // {
   //   path: "/about",
