@@ -48,8 +48,9 @@
             <a-menu-item>
               <router-link to="/">首页</router-link>
             </a-menu-item>
-            <a-menu-item>
-              <router-link to="/login">退出登录</router-link>
+            <a-menu-item @click="logout">
+              <!-- <router-link to="/login">退出登录</router-link> -->
+              <span>退出登录</span>
             </a-menu-item>
           </a-menu>
         </a-dropdown>
@@ -63,6 +64,7 @@
 </template>
 <script>
 import SubMenu from "./sub-menu";
+import { throttle,debounce } from '@/utils'
 export default {
   components: {
     'sub-menu': SubMenu,
@@ -98,11 +100,15 @@ export default {
   mounted(){
     console.log(this.$router.options.routes)
     this.init();
-    window.onresize = () => this.init();
+    window.onresize = debounce(()=> this.init(), 500);
   },
   methods:{
-    init(){
+    // 根据窗口大小动态计算，小于 990 为手机
+    init() {
       if (!document.hidden) {
+        // console.log(new Date() - this.time_resize < 800)
+        if(new Date() - this.time_resize < 800) return;
+        this.time_resize = new Date()
         let clientWidth = document.documentElement.clientWidth;
         if(clientWidth < 990 ) {
           this.mobile = true
@@ -126,11 +132,14 @@ export default {
       }
     },
     selectMenu( {item, key, keyPath } ){
-      console.log(  key  )
       if(this.mobile) {
         this.collapsed = true
       }
     },
+    async logout(){
+      await this.$store.dispatch('user/logout')
+      this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+    }
   }
 };
 </script>
@@ -141,7 +150,7 @@ export default {
     height: 100%;
 }
 .aside{
-  position: fixed;
+  position: fixed !important;
   z-index: 999;
   top: 0;
   bottom: 0;

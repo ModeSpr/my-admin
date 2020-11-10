@@ -5,7 +5,21 @@ import Layout from '@/layouts'
 
 Vue.use(VueRouter);
 
-const constantRoutes = [
+export const constantRoutes = [
+  {
+    path: '/login',
+    name: 'login',
+    component: () => import('@/views/login/login'),
+    meta: { title: '登录' },
+    hidden: true
+  },
+  {
+    path: '/404',
+    name: '404',
+    component: () => import('@/views/default/404'),
+    meta: { title: 'NotFound' },
+    hidden: true
+  },
   {
     path: '/',
     component: Layout,
@@ -19,6 +33,16 @@ const constantRoutes = [
       },
     ],
   },
+  // {
+  //   path: "/about",
+  //   name: "About",
+  //   // lazy-loaded when the route is visited.
+  //   component: () =>
+  //     import(/* webpackChunkName: "about" */ "../views/About.vue")
+  // }
+];
+
+export const asyncRoutes = [
   {
     path: '/home',
     component: Layout,
@@ -39,39 +63,18 @@ const constantRoutes = [
       },
     ],
   },
-  {
-    path: '/login',
-    name: 'login',
-    component: () => import('@/views/login/login'),
-    meta: { title: '登录' },
-    hidden: true
-  },
-  {
-    path: '/404',
-    name: '404',
-    component: () => import('@/views/default/404'),
-    meta: { title: 'NotFound' },
-    hidden: true
-  },
-  // {
-  //   path: "/about",
-  //   name: "About",
-  //   // lazy-loaded when the route is visited.
-  //   component: () =>
-  //     import(/* webpackChunkName: "about" */ "../views/About.vue")
-  // }
-  {
-    path: '*',
-    redirect: '/404',
-    hidden: true,
-  },
-];
 
-const router = new VueRouter({
+  // END !
+  { path: '*', redirect: '/404', hidden: true }
+]
+
+const createRouter = () => new VueRouter({
   mode: "history",
   base: process.env.BASE_URL,
   routes: constantRoutes
 });
+
+const router = createRouter()
 
 // 允许路由重复点击
 // const originalPush = VueRouter.prototype.push
@@ -80,5 +83,11 @@ const router = new VueRouter({
 //     return originalPush.call(this, location, onResolve, onReject)
 //   return originalPush.call(this, location).catch((err) => err)
 // }
+
+// https://github.com/vuejs/vue-router/issues/1234#issuecomment-357941465
+export function resetRouter() {
+  const newRouter = createRouter()
+  router.matcher = newRouter.matcher // reset router
+}
 
 export default router;
