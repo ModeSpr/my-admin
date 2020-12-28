@@ -56,7 +56,7 @@
         </a-dropdown>
       </a-layout-header>
       <!-- 主体 -->
-      <a-layout-content :style="{ margin: '24px 16px', padding: '24px', background: '#fff', minWidth: '500px', minHeight: 'calc(100vh - 112px)' }" >
+      <a-layout-content :style="{ margin: '24px 16px', padding: '24px', background: '#fff', minHeight: 'calc(100vh - 112px)' }" >
         <router-view />
       </a-layout-content>
     </a-layout>
