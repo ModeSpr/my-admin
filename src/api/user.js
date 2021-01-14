@@ -37,7 +37,7 @@ export function getInfo(token) {
       permissions = ["admin", "editor"];
       username = "test";
     }
-    reject( {
+    resolve( {
       code: 200,
       msg: "success",
       data: {

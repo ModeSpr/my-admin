@@ -32,7 +32,7 @@ router.beforeResolve(async(to, from, next) => {
         try {
           // get user info
           store.dispatch('user/getUserInfo').then(res=>{
-            console.log('permissions',res)
+            // console.log('permissions',res)
           })
           // generate accessible routes map based on roles
           // const accessRoutes = await store.dispatch('permission/generateRoutes', roles)
